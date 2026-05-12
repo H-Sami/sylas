@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sylas"
+version = "1.0.0"
+description = "Autonomous Security Remediation - Multi-scanner vulnerability detection and dependency fixing"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "requests",
+    "pyyaml",
+    "packaging",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "black", "flake8"]
+scanners = ["bandit", "semgrep", "pip-audit"]
+ui = ["rich"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["agent*"]
+
+[project.scripts]
+sylas = "agent.main:main"
