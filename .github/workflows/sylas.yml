@@ -28,7 +28,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: Run Trivy vulnerability scanner (SARIF)
+      - name: Run Trivy (SARIF for Security tab)
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'fs'
@@ -38,9 +38,8 @@ jobs:
           severity: 'HIGH,CRITICAL'
           exit-code: '0'
           ignore-unfixed: true
-          vuln-type: 'os,library'
 
-      - name: Run Trivy JSON report
+      - name: Run Trivy (JSON report)
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'fs'
@@ -49,16 +48,15 @@ jobs:
           output: 'trivy-results.json'
           severity: 'HIGH,CRITICAL'
           exit-code: '0'
-          ignore-unfixed: true
 
-      - name: Upload Trivy results to Security tab
+      - name: Upload to Security tab
         if: always()
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: trivy-results.sarif
           category: trivy
 
-      - name: Upload Trivy results as artifact
+      - name: Upload artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -66,7 +64,7 @@ jobs:
           path: trivy-results.json
           retention-days: 30
 
-      - name: Comment scan results on PR
+      - name: Comment on PR
         if: github.event_name == 'pull_request'
         uses: actions/github-script@v7
         with:
@@ -74,16 +72,14 @@ jobs:
             const fs = require('fs');
             try {
               const results = JSON.parse(fs.readFileSync('trivy-results.json', 'utf8'));
-              const vulnCount = results.Results?.reduce((acc, r) => acc + (r.Vulnerabilities?.length || 0), 0) || 0;
+              const count = results.Results?.reduce((acc, r) => acc + (r.Vulnerabilities?.length || 0), 0) || 0;
               github.rest.issues.createComment({
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                body: `## Security Scan Results\n\nTrivy found **${vulnCount}** vulnerabilities (HIGH+).\n\nSee artifacts for full details.`
+                body: `## Security Scan Results\n\nTrivy found **${count}** HIGH/CRITICAL vulnerabilities.\n\nSee artifacts for details.`
               });
-            } catch (e) {
-              console.log("Could not read JSON report for comment");
-            }
+            } catch (e) { console.log("No JSON report for comment"); }
 
   remediate:
     runs-on: ubuntu-latest
@@ -98,34 +94,39 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
-      - name: Install Trivy & dependencies
+      - name: Install Trivy
         run: |
           sudo apt-get update
-          wget -qO - https://github.com/aquasecurity/trivy/releases/latest/download/trivy_$(curl -s https://api.github.com/repos/aquasecurity/trivy/releases/latest | grep tag_name | cut -d '"' -f 4 | sed 's/v//').linux-amd64.deb > trivy.deb
+          wget -qO - https://github.com/aquasecurity/trivy/releases/latest/download/trivy_$(curl -s https://api.github.com/repos/aquasecurity/trivy/releases/latest | grep '"tag_name"' | cut -d '"' -f 4 | sed 's/v//').linux-amd64.deb > trivy.deb
           sudo dpkg -i trivy.deb && rm trivy.deb
-          pip install flask pytest
 
-      - name: Create remediation branch & run Sylas
+      - name: Install dependencies
+        run: pip install flask pytest
+
+      - name: Run Sylas Agent + Create Remediation
         run: |
-          git checkout -b remediation-fix
-          python -m agent.main . --trivy --auto-pr || echo "Agent completed"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b remediation-fix || git checkout remediation-fix
+          python -m agent.main . --trivy --auto-pr || echo "Sylas completed with exit code $?"
+        continue-on-error: true
 
       - name: Create Pull Request
-        if: always()   # Try even if previous steps had issues
         uses: peter-evans/create-pull-request@v7
         with:
           branch: remediation-fix
-          title: 'Security: Auto-remediation of vulnerabilities'
+          title: '🔒 Security: Auto-remediation of vulnerabilities'
           body: |
-            ## Automated Security Remediation
+            ## Automated Security Remediation by Sylas
 
-            This PR was created by Sylas.
-            Please review and merge if all checks pass.
-          labels: security, automated
+            This PR was automatically generated.
+            Please review the changes and merge if appropriate.
           delete-branch: true
+          labels: security, automated
