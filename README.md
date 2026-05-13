@@ -1,6 +1,6 @@
 # Sylas
 
-### Autonomous Security Remediation (PROOF OF CONCEPT)
+### Autonomous Security Remediation (PROOF OF CONCEPT) (BUGS DO EXIST)
 
 **Sylas** is a powerful, scanner-only security agent that automatically detects and remediates vulnerabilities in your codebase.
 
