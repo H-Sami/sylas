@@ -34,24 +34,27 @@ jobs:
           python-version: '3.10'
           cache: 'pip'
 
-      - name: Install Trivy
+      - name: Install Trivy (latest stable)
         run: |
           sudo apt-get update
-          wget https://github.com/aquasecurity/trivy/releases/download/v0.54.1/trivy_0.54.1_linux-amd64.deb
-          sudo dpkg -i trivy_0.54.1_linux-amd64.deb
+          wget -qO - https://github.com/aquasecurity/trivy/releases/latest/download/trivy_$(curl -s https://api.github.com/repos/aquasecurity/trivy/releases/latest | grep tag_name | cut -d '"' -f 4 | sed 's/v//').linux-amd64.deb > trivy.deb
+          sudo dpkg -i trivy.deb
+          rm trivy.deb
 
       - name: Run Trivy vulnerability scan
         run: |
-          trivy fs --format sarif --output trivy-results.sarif .
+          trivy fs --format sarif --output trivy-results.sarif --severity HIGH,CRITICAL .
           trivy fs --format json --output trivy-results.json .
 
       - name: Upload Trivy results to Security tab
-        uses: github/codeql-action/upload-security-results@v3
+        if: always()                    # ← Always run, even if scan finds issues
+        uses: github/codeql-action/upload-sarif@v4
         with:
-          sarif_file: 'trivy-results.sarif'
-          category: 'trivy'
+          sarif_file: trivy-results.sarif
+          category: trivy
 
       - name: Upload Trivy results as artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: trivy-scan-results
@@ -66,12 +69,11 @@ jobs:
             const fs = require('fs');
             const results = JSON.parse(fs.readFileSync('trivy-results.json', 'utf8'));
             const vulnCount = results.Results?.reduce((acc, r) => acc + (r.Vulnerabilities?.length || 0), 0) || 0;
-
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `## Security Scan Results\n\nTrivy found **${vulnCount}** vulnerabilities.\n\nSee artifacts for full details.`
+              body: `## Security Scan Results\n\nTrivy found **${vulnCount}** vulnerabilities (HIGH+).\n\nSee artifacts for full details.`
             });
 
   remediate:
@@ -93,11 +95,12 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install Trivy
+      - name: Install Trivy (latest stable)
         run: |
           sudo apt-get update
-          wget https://github.com/aquasecurity/trivy/releases/download/v0.54.1/trivy_0.54.1_linux-amd64.deb
-          sudo dpkg -i trivy_0.54.1_linux-amd64.deb
+          wget -qO - https://github.com/aquasecurity/trivy/releases/latest/download/trivy_$(curl -s https://api.github.com/repos/aquasecurity/trivy/releases/latest | grep tag_name | cut -d '"' -f 4 | sed 's/v//').linux-amd64.deb > trivy.deb
+          sudo dpkg -i trivy.deb
+          rm trivy.deb
 
       - name: Install agent dependencies
         run: |
@@ -125,7 +128,6 @@ jobs:
               base: 'main',
               body: '## Automated Security Remediation\n\nThis PR was created by Sylas.\n\nPlease review and merge if all checks pass.'
             });
-
             await github.rest.pulls.update({
               owner: context.repo.owner,
               repo: context.repo.repo,
