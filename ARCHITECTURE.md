@@ -1,6 +1,6 @@
 # Architecture Overview
 
-Sylas v1.0.0 — Technical Design
+Sylas v1.0.0 - Technical Design
 
 ## System Architecture
 
@@ -53,7 +53,7 @@ Sylas v1.0.0 — Technical Design
 
 ### 4. Orchestrator (`orchestrator.py`)
 - **SecurityRemediationAgent**: Central coordinator
-  - No LLM configuration — purely scanner-based
+  - No LLM configuration - purely scanner-based
   - Manages scanner lifecycle
   - Coordinates dependency-only remediation workflow
   - Git operations coordination
@@ -105,7 +105,7 @@ Sylas v1.0.0 — Technical Design
 4. Git:   Changes → Branch → Commit → (Optional) PR
 ```
 
-Code vulnerabilities and secrets are **reported only** — they flow through steps 1, 3, and 4 but are skipped in step 2.
+Code vulnerabilities and secrets are **reported only** - they flow through steps 1, 3, and 4 but are skipped in step 2.
 
 ## Scanner Registry
 
