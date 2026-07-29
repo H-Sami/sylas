@@ -6,11 +6,11 @@
 
 ## Features
 
-- **Multi-Scanner Support** — Runs Trivy, Semgrep, Bandit, pip-audit, and Gitleaks in parallel
-- **Automatic Dependency Fixing** — Updates vulnerable packages with smart version resolution
-- **Verification System** — Confirms fixes were successfully applied
-- **GitHub PR Creation** — Automatically creates pull requests with fixes
-- **Professional Reporting** — Generates detailed vulnerability reports
+- **Multi-Scanner Support** - Runs Trivy, Semgrep, Bandit, pip-audit, and Gitleaks in parallel
+- **Automatic Dependency Fixing** - Updates vulnerable packages with smart version resolution
+- **Verification System** - Confirms fixes were successfully applied
+- **GitHub PR Creation** - Automatically creates pull requests with fixes
+- **Professional Reporting** - Generates detailed vulnerability reports
 
 ## Installation
 
