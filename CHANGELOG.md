@@ -15,7 +15,7 @@ All notable changes to Sylas will be documented in this file.
 - Version bumped to 1.0.0
 - All banners, titles, and docstrings updated
 
-## [0.9.0] - 2026-05-12 — Scanner Edition
+## [0.9.0] - 2026-05-12 - Scanner Edition
 
 ### Added
 - **GitleaksScanner**: New secret detection scanner using `gitleaks detect --no-git`
@@ -34,7 +34,7 @@ All notable changes to Sylas will be documented in this file.
 - **All LLM log methods**: `log_llm_request()`, `log_llm_response()`, etc. removed from `logger.py`
 
 ### Changed
-- **remediator.py**: Stripped from 664 to ~70 lines — only handles dependency updates via DependencyManager
+- **remediator.py**: Stripped from 664 to ~70 lines - only handles dependency updates via DependencyManager
 - **verifier.py**: Simplified to syntax checking + git diff stats (no more re-scan verification)
 - **orchestrator.py**: No LLM endpoint management, simplified remediate() for deps only
 - **scanners.py**: GitleaksScanner added, `run_all_scans()` runs 5 scanners in parallel (up from 4)
@@ -51,7 +51,7 @@ All notable changes to Sylas will be documented in this file.
 - Much faster execution (no LLM wait times)
 - Higher reliability on dependency fixes
 
-## [0.8.1] - 2024-04-27 — Legacy LLM version
+## [0.8.1] - 2024-04-27 - Legacy LLM version
 
 ### Added
 - `scanner` field to `Vulnerability` dataclass for better tracking
@@ -97,7 +97,7 @@ All notable changes to Sylas will be documented in this file.
 - `Vulnerability` dataclass now includes `scanner` field
 - Report summary uses `scanner` field instead of ID prefix inference
 
-## [0.8.0] - 2024-04-26 — Legacy LLM version
+## [0.8.0] - 2024-04-26 - Legacy LLM version
 
 ### Added
 - Initial release with Trivy, Bandit, pip-audit scanners
